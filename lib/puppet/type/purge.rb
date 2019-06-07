@@ -207,7 +207,16 @@ Puppet::Type.newtype(:purge) do
   # purge will evaluate the conditions given in if/unless
   def purge?(res_type)
 
-    res = res_type.to_resource.to_hash
+    # Work around the fact that Puppet::Resource and Puppet::ResourceApi::ResourceShim
+    # don't have compatible APIs for getting the hash of resource attributes.
+    res_obj = res_type.to_resource
+    res = if res_obj.respond_to?(:to_hash)
+      res_obj.to_hash
+    elsif res_obj.respond_to?(:values)
+      res_obj.values.dup
+    else
+      raise "#{res_obj} does not behave like a resource"
+    end
 
     if self[:unless]
       return false unless evaluate_resource(res, self[:unless])
