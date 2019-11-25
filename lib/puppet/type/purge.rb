@@ -4,6 +4,8 @@ Puppet::Type.newtype(:purge) do
 
   attr_reader :purged_resources
 
+  apply_to_all
+
   @doc=(<<-EOT)
   This is a metatype to purge resources from the agent.  When run without
   parameters the purge type takes a resource type as a title.  The
